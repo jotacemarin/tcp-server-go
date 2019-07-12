@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -9,14 +10,18 @@ import (
 	"strconv"
 )
 
+var fileURL = flag.String("fileURL", "", "La ruta del archivo")
+
 func main() {
+	flag.Parse()
+
 	connection, err := net.Dial("tcp", "localhost:6660")
 	if err != nil {
 		fmt.Printf("Error de conexion: \n%s", err)
 	}
 
 	defer connection.Close()
-	fmt.Println("Conectado con el servidor")
+	fmt.Println("Conectado con el servidor.")
 
 	for {
 		scanner := bufio.NewScanner(connection)
@@ -33,7 +38,11 @@ func main() {
 			text := scanner.Text()
 			switch {
 			case text == "Hola.":
-				sendFile(connection)
+				if len(*fileURL) == 0 {
+					fmt.Println("No se ha especificado la ruta del archivo para enviar.")
+				} else {
+					sendFile(connection)
+				}
 				return
 			}
 
@@ -46,7 +55,7 @@ func sendMessage(message string, connection net.Conn) {
 }
 
 func sendFile(connection net.Conn) {
-	file, err := os.Open("./client/dummyfile.dat")
+	file, err := os.Open(*fileURL)
 	if err != nil {
 		fmt.Printf("Error en lectura de archivo %s", err)
 		os.Exit(1)
@@ -65,7 +74,7 @@ func sendFile(connection net.Conn) {
 
 	sendBuffer := make([]byte, 1024)
 
-	fmt.Println("Iniciando envio del archivo")
+	fmt.Println("Iniciando envio del archivo...")
 
 	for {
 		_, err := file.Read(sendBuffer)
@@ -75,7 +84,8 @@ func sendFile(connection net.Conn) {
 		connection.Write(sendBuffer)
 	}
 
-	fmt.Println("Archivo enviado al servidor")
+	fmt.Println("Archivo enviado al servidor.")
+	fmt.Println("Cerrando conexion.")
 	return
 }
 
