@@ -24,6 +24,7 @@ func main() {
 	fmt.Printf("Servidor iniciado en %s:%d.\nEsperando de conexiones.\n", *addr, *port)
 
 	for {
+		
 		connection, err := server.Accept()
 		if err != nil {
 			fmt.Println("Error: ", err)

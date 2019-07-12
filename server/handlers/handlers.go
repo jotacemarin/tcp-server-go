@@ -3,7 +3,11 @@ package handlers
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
+	"os"
+	"strconv"
+	"strings"
 )
 
 // HandlerConnection : administrador de la conexion
@@ -14,24 +18,44 @@ func HandlerConnection(connection net.Conn) {
 	sendMessage("\r\nHola.\r\n", connection)
 
 	scanner := bufio.NewScanner(connection)
-
-	for {
-
-		ok := scanner.Scan()
-		if !ok {
-			break
-		}
-
-		handleMessage(scanner.Text(), connection)
-
-	}
+	handleMessage(scanner.Text(), connection)
 
 	fmt.Println("Client at " + remoteAddr + " disconnected.")
 }
 
 // manejador de los mensajes
-func handleMessage(message string, conn net.Conn) {
+func handleMessage(message string, connection net.Conn) {
 	fmt.Println("> " + message)
+
+	bufferFileName := make([]byte, 64)
+	bufferFileSize := make([]byte, 10)
+
+	connection.Read(bufferFileSize)
+	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
+
+	connection.Read(bufferFileName)
+	fileName := strings.Trim(string(bufferFileName), ":")
+
+	newFile, err := os.Create(fileName)
+	if err != nil {
+		panic(err)
+	}
+	defer newFile.Close()
+
+	var receivedBytes int64
+
+	for {
+
+		if (fileSize - receivedBytes) < 1024 {
+			io.CopyN(newFile, connection, (fileSize - receivedBytes))
+			connection.Read(make([]byte, (receivedBytes+1024)-fileSize))
+			break
+		}
+		io.CopyN(newFile, connection, 1024)
+		receivedBytes += 1024
+
+	}
+	fmt.Println("archivo recivido!")
 }
 
 // envia mensaje hacia el cliente
