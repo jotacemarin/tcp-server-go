@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 
+	c "./config"
 	"./handlers"
 )
 
@@ -13,8 +14,14 @@ var addr = flag.String("addr", "localhost", "La direccion para escuchar los clie
 var port = flag.Int("port", 6660, "El puerto por defecto es 6660.")
 var protocol = flag.String("protocol", "tcp", "El protocolo de la conneccion es")
 
-func main() {
+func init() {
 	flag.Parse()
+	if *addr == "localhost" {
+		*addr = c.Configurations.Addr
+	}
+}
+
+func main() {
 
 	server, err := net.Listen(*protocol, fmt.Sprintf("%s:%d", *addr, *port))
 	if err != nil {
@@ -33,6 +40,7 @@ func main() {
 		}
 
 		handlers.HandlerConnection(connection)
+
 	}
 
 }
