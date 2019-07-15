@@ -4,27 +4,30 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // HandlerConnection : administrador de la conexion
 func HandlerConnection(connection net.Conn) {
 	remoteAddr := connection.RemoteAddr().String()
-	fmt.Printf("Cliente conectado desde %s\n", remoteAddr)
+	log.Printf("Cliente conectado desde %s\n", remoteAddr)
 
 	sendMessage("\r\nHola.\r\n", connection)
 
 	scanner := bufio.NewScanner(connection)
 	handleMessage(scanner.Text(), connection)
 
-	fmt.Println("Cliente en " + remoteAddr + " se ha desconectado.")
+	log.Println("Cliente en " + remoteAddr + " se ha desconectado.")
 }
 
 // manejador de los mensajes
 func handleMessage(message string, connection net.Conn) {
+	folderFile := fmt.Sprint("/tmp/tcp-server-go/" + time.Now().Format("2006-01-02") + "/")
 
 	bufferFileName := make([]byte, 64)
 	bufferFileSize := make([]byte, 10)
@@ -33,15 +36,15 @@ func handleMessage(message string, connection net.Conn) {
 	fileSize, _ := strconv.ParseInt(strings.Trim(string(bufferFileSize), ":"), 10, 64)
 
 	connection.Read(bufferFileName)
-	fileName := strings.Trim(string(bufferFileName), ":")
+	fileName := fmt.Sprintf("%s %s", time.Now().Format(time.StampMilli), strings.Trim(string(bufferFileName), ":"))
 
-	if _, err := os.Stat("/tmp/tcp-server-go/"); os.IsNotExist(err) {
-		os.MkdirAll("/tmp/tcp-server-go/", os.ModePerm)
+	if _, err := os.Stat(folderFile); os.IsNotExist(err) {
+		os.MkdirAll(folderFile, os.ModePerm)
 	}
 
-	newFile, err := os.Create("/tmp/tcp-server-go/" + fileName)
+	newFile, err := os.Create(folderFile + fileName)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 	defer newFile.Close()
@@ -60,7 +63,7 @@ func handleMessage(message string, connection net.Conn) {
 
 	}
 
-	fmt.Println("Archivo recivido!")
+	log.Println("Archivo recivido!")
 }
 
 // envia mensaje hacia el cliente

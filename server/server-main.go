@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net"
-	"os"
 
 	"./handlers"
 )
@@ -18,18 +18,18 @@ func main() {
 
 	server, err := net.Listen(*protocol, fmt.Sprintf("%s:%d", *addr, *port))
 	if err != nil {
-		fmt.Printf("Error en servidor \n%s", err)
+		log.Printf("Error en servidor \n%s", err)
 	}
 	defer server.Close()
 
-	fmt.Printf("Servidor iniciado en %s:%d.\nEsperando de conexiones.\n", *addr, *port)
+	log.Printf("Servidor iniciado en %s:%d.\nEsperando de conexiones.\n", *addr, *port)
 
 	for {
 
 		connection, err := server.Accept()
 		if err != nil {
-			fmt.Println("Error: ", err)
-			os.Exit(1)
+			log.Printf("Error con la conexion: \n%s", err)
+			return
 		}
 
 		handlers.HandlerConnection(connection)
