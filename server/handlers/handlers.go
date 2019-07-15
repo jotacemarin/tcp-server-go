@@ -20,12 +20,11 @@ func HandlerConnection(connection net.Conn) {
 	scanner := bufio.NewScanner(connection)
 	handleMessage(scanner.Text(), connection)
 
-	fmt.Println("Client at " + remoteAddr + " disconnected.")
+	fmt.Println("Cliente en " + remoteAddr + " se ha desconectadp.")
 }
 
 // manejador de los mensajes
 func handleMessage(message string, connection net.Conn) {
-	fmt.Println("> " + message)
 
 	bufferFileName := make([]byte, 64)
 	bufferFileSize := make([]byte, 10)
@@ -38,7 +37,8 @@ func handleMessage(message string, connection net.Conn) {
 
 	newFile, err := os.Create(fileName)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		return
 	}
 	defer newFile.Close()
 
@@ -55,7 +55,8 @@ func handleMessage(message string, connection net.Conn) {
 		receivedBytes += 1024
 
 	}
-	fmt.Println("archivo recivido!")
+
+	fmt.Println("Archivo recivido!")
 }
 
 // envia mensaje hacia el cliente
