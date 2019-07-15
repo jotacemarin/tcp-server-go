@@ -20,7 +20,7 @@ func HandlerConnection(connection net.Conn) {
 	scanner := bufio.NewScanner(connection)
 	handleMessage(scanner.Text(), connection)
 
-	fmt.Println("Cliente en " + remoteAddr + " se ha desconectadp.")
+	fmt.Println("Cliente en " + remoteAddr + " se ha desconectado.")
 }
 
 // manejador de los mensajes
@@ -35,7 +35,11 @@ func handleMessage(message string, connection net.Conn) {
 	connection.Read(bufferFileName)
 	fileName := strings.Trim(string(bufferFileName), ":")
 
-	newFile, err := os.Create(fileName)
+	if _, err := os.Stat("/tmp/tcp-server-go/"); os.IsNotExist(err) {
+		os.MkdirAll("/tmp/tcp-server-go/", os.ModePerm)
+	}
+
+	newFile, err := os.Create("/tmp/tcp-server-go/" + fileName)
 	if err != nil {
 		fmt.Println(err)
 		return

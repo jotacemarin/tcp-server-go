@@ -10,12 +10,14 @@ import (
 	"strconv"
 )
 
+var addr = flag.String("addr", "localhost", "La direccion para escuchar los clientes; por defecto es \"\".")
+var port = flag.Int("port", 6660, "El puerto por defecto es 6660.")
 var fileURL = flag.String("fileURL", "", "La ruta del archivo")
 
 func main() {
 	flag.Parse()
 
-	connection, err := net.Dial("tcp", "localhost:6660")
+	connection, err := net.Dial("tcp", fmt.Sprintf("%s:%d", *addr, *port))
 	if err != nil {
 		fmt.Printf("Error de conexion: \n%s", err)
 	}
