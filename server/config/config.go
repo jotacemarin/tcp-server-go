@@ -2,9 +2,11 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
+// Config struct for model Configurations
 type Config struct {
 	Addr              string
 	DestinationFolder string
@@ -15,13 +17,12 @@ type Config struct {
 var Configurations Config
 
 // LoadConfig : func
-func init() (Config, errConfig error) {
+func init() {
 	configurationFile, err := os.Open("/opt/tcp-server-go/conf.json")
 	if err != nil {
-		return nil, err
+		fmt.Printf("%s\n", err)
 	}
 	defer configurationFile.Close()
 	jsonParser := json.NewDecoder(configurationFile)
 	jsonParser.Decode(&Configurations)
-	return configurationFile, nil
 }
